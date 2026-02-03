@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Web SSH Client{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dash.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h2 mb-2">
+                <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard
+            </h1>
+            <p class="text-muted mb-0">Welcome back, {{ current_user.username }}!</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <!-- Connections -->
+        <div class="col-md-4 mb-4">
+            <div class="card stats-card bg-primary text-white">
+                <div class="card-body">
+                    <div class="stats-content">
+                        <div class="card-title">Connections</div>
+                        <div class="card-value">{{ connections|length }}</div>
+                        <div class="card-subtext">Total SSH connections</div>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Last Login -->
+        <div class="col-md-4 mb-4">
+            <div class="card stats-card bg-success text-white">
+                <div class="card-body">
+                    <div class="stats-content">
+                        <div class="card-title">Last Login</div>
+                        {% if current_user.last_login %}
+                        <div class="card-value">{{ current_user.last_login|wib_time }}</div>
+                        <div class="card-subtext">{{ current_user.last_login|wib_date }}</div>
+                        {% else %}
+                            <div class="card-value">Never</div>
+                            <div class="card-subtext">No login recorded</div>
+                        {% endif %}
+                    </div>
+                    <div class="stats-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active -->
+        <div class="col-md-4 mb-4">
+            <div class="card stats-card bg-info text-white">
+                <div class="card-body">
+                    <div class="stats-content">
+                        <div class="card-title">Active</div>
+                        <div class="card-value">{{ active_count }}</div>
+                        <div class="card-subtext">Recent connections (24h)</div>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="fas fa-plug"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: Connections -->
+        <div class="col-lg-8">
+            <!-- Recent Connections -->
+            <div class="card content-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-server me-2"></i>Recent Connections</h5>
+                    <a href="{{ url_for('connections') }}" class="btn btn-sm btn-outline-primary">
+                        View All <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if connections %}
+                        <div class="table-responsive">
+                            <table class="connections-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Host</th>
+                                        <th>User</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for conn in connections[:7] %}
+                                    <tr style="--row-index: {{ loop.index0 }}">
+                                        <td>
+                                            <div class="connection-name">
+                                                <div class="connection-icon">
+                                                    <i class="fas fa-server"></i>
+                                                </div>
+                                                <div class="connection-details">
+                                                    <h6>{{ conn.name }}</h6>
+                                                    {% if conn.last_used %}
+                                                        <small>Last: {{ conn.last_used.strftime('%H:%M') }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="connection-host">{{ conn.hostname }}</div>
+                                            <div class="connection-port">Port: {{ conn.port }}</div>
+                                        </td>
+                                        <td>
+                                            <span class="connection-user">{{ conn.username }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{{ url_for('terminal', connection_id=conn.id) }}"
+                                                   class="btn btn-success" title="Connect">
+                                                    <i class="fas fa-terminal"></i>
+                                                </a>
+                                                <a href="{{ url_for('edit_connection', connection_id=conn.id) }}"
+                                                   class="btn btn-outline-primary" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{{ url_for('test_connection_direct', connection_id=conn.id) }}"
+                                                   class="btn btn-outline-info" title="Test">
+                                                    <i class="fas fa-plug"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-server"></i>
+                            <h5>No SSH connections yet</h5>
+                            <p>Add your first SSH connection to get started</p>
+                            <a href="{{ url_for('add_connection') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Add Connection
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Quick Actions and Recent Activity -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card content-card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions-container">
+                        <a href="{{ url_for('add_connection') }}" class="quick-action-btn">
+                            <i class="fas fa-plus"></i>
+                            <span class="btn-text">Add New Connection</span>
+                            <span class="btn-icon"><i class="fas fa-chevron-right"></i></span>
+                        </a>
+                        <a href="{{ url_for('connections') }}" class="quick-action-btn">
+                            <i class="fas fa-list"></i>
+                            <span class="btn-text">View All Connections</span>
+                            <span class="btn-icon"><i class="fas fa-chevron-right"></i></span>
+                        </a>
+                        <a href="{{ url_for('settings') }}" class="quick-action-btn">
+                            <i class="fas fa-cog"></i>
+                            <span class="btn-text">Settings</span>
+                            <span class="btn-icon"><i class="fas fa-chevron-right"></i></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="card content-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-heartbeat me-2"></i>System Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="system-status">
+                        <div class="status-item">
+                            <div class="status-info">
+                                <div class="status-icon online">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <span class="status-text">Application</span>
+                            </div>
+                            <span class="status-badge online">Online</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-info">
+                                <div class="status-icon online">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <span class="status-text">Database</span>
+                            </div>
+                            <span class="status-badge online">Connected</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-info">
+                                <div class="status-icon online">
+                                    <i class="fas fa-terminal"></i>
+                                </div>
+                                <span class="status-text">SSH Service</span>
+                            </div>
+                            <span class="status-badge online">Ready</span>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-info">
+                                <div class="status-icon online">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <span class="status-text">Active Users</span>
+                            </div>
+                            <span class="status-badge online">1</span>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3 pt-3 border-top" style="margin-bottom: 18px;">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            Last updated: {{ current_time.strftime('%H:%M:%S') if current_time else 'N/A' }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh dashboard every 120 seconds
+    let refreshTimer = setTimeout(() => {
+        window.location.reload();
+    }, 120000);
+
+    // Reset timer on user activity
+    document.addEventListener('click', function() {
+        clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(() => {
+            window.location.reload();
+        }, 120000);
+    });
+
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Add animation to cards on load
+    const cards = document.querySelectorAll('.stats-card, .content-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+
+    // Enhanced hover effects for table rows
+    const tableRows = document.querySelectorAll('.connections-table tbody tr');
+    tableRows.forEach((row, index) => {
+        row.style.setProperty('--row-index', index);
+        
+        // Add ripple effect on click
+        row.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' || e.target.closest('a')) {
+                return; // Don't trigger ripple for link clicks
+            }
+            
+            const ripple = document.createElement('div');
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.backgroundColor = 'rgba(102, 126, 234, 0.2)';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.top = e.offsetY + 'px';
+            ripple.style.left = e.offsetX + 'px';
+            ripple.style.width = '100px';
+            ripple.style.height = '100px';
+            ripple.style.pointerEvents = 'none';
+            
+            this.style.position = 'relative';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    // Add CSS for ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Parallax effect for stats cards on mouse move
+    const statsCards = document.querySelectorAll('.stats-card');
+    statsCards.forEach(card => {
+        card.addEventListener('mousemove', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateY = (x - centerX) / 25;
+            const rotateX = (centerY - y) / 25;
+            
+            this.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(-8px)';
+        });
+    });
+
+    // Add pulse animation to active stats
+    const activeCard = document.querySelector('.stats-card.bg-info');
+    if (activeCard) {
+        setInterval(() => {
+            activeCard.style.boxShadow = '0 12px 30px rgba(54, 209, 220, 0.3)';
+            setTimeout(() => {
+                activeCard.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.15)';
+            }, 1000);
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Add SSH Connection - Web SSH Client{% endblock %}
+
+{% block styles %}
+<style>
+    .auth-method-content {
+        display: none;
+    }
+    .auth-method-content.active {
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-plus-circle"></i> Add SSH Connection</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('add_connection') }}" id="connectionForm">
+                    <!-- Basic Info -->
+                    <div class="mb-4">
+                        <h5><i class="fas fa-info-circle"></i> Connection Info</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Connection Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" required
+                                       placeholder="My Server, Production, etc.">
+                                <div class="form-text">A friendly name for this connection</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="hostname" class="form-label">Hostname / IP Address *</label>
+                                <input type="text" class="form-control" id="hostname" name="hostname" required
+                                       placeholder="192.168.1.100 or example.com">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="port" class="form-label">Port</label>
+                                <input type="number" class="form-control" id="port" name="port" value="22" min="1" max="65535">
+                            </div>
+                            <div class="col-md-9 mb-3">
+                                <label for="username" class="form-label">Username *</label>
+                                <input type="text" class="form-control" id="username" name="username" required
+                                       placeholder="root, admin, ubuntu, etc.">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Authentication Method -->
+                    <div class="mb-4">
+                        <h5><i class="fas fa-key"></i> Authentication</h5>
+                        
+                        <div class="mb-3">
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="auth_method" id="auth_password" value="password" checked>
+                                <label class="btn btn-outline-primary" for="auth_password">
+                                    <i class="fas fa-lock"></i> Password
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="auth_method" id="auth_key" value="key">
+                                <label class="btn btn-outline-primary" for="auth_key">
+                                    <i class="fas fa-key"></i> SSH Key
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Password Method -->
+                        <div id="password_auth" class="auth-method-content active">
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" name="password"
+                                           placeholder="Enter SSH password">
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">Leave empty for key-based authentication</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Key Method -->
+                        <div id="key_auth" class="auth-method-content">
+                            <div class="mb-3">
+                                <label for="private_key" class="form-label">Private Key</label>
+                                <textarea class="form-control font-monospace" id="private_key" name="private_key" 
+                                          rows="10" placeholder="-----BEGIN RSA PRIVATE KEY-----..."></textarea>
+                                <div class="form-text">Paste your SSH private key here</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Test Connection -->
+                    <div class="mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-vial"></i> Test Connection</h6>
+                            </div>
+                            <div class="card-body">
+                                <button type="button" class="btn btn-outline-info" id="testConnectionBtn">
+                                    <i class="fas fa-plug"></i> Test Connection
+                                </button>
+                                <div id="testResult" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('connections') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Connection
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    
+    toggleBtn.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        toggleBtn.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    });
+    
+    // Toggle auth methods
+    const authMethodRadios = document.querySelectorAll('input[name="auth_method"]');
+    const passwordAuth = document.getElementById('password_auth');
+    const keyAuth = document.getElementById('key_auth');
+    
+    authMethodRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'password') {
+                passwordAuth.classList.add('active');
+                keyAuth.classList.remove('active');
+                passwordInput.required = true;
+                document.getElementById('private_key').required = false;
+            } else {
+                passwordAuth.classList.remove('active');
+                keyAuth.classList.add('active');
+                passwordInput.required = false;
+                document.getElementById('private_key').required = true;
+            }
+        });
+    });
+    
+    // Test connection
+    const testBtn = document.getElementById('testConnectionBtn');
+    const testResult = document.getElementById('testResult');
+    
+    testBtn.addEventListener('click', function() {
+        const formData = {
+            hostname: document.getElementById('hostname').value,
+            port: document.getElementById('port').value || 22,
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value,
+            private_key: document.getElementById('private_key').value
+        };
+        
+        if (!formData.hostname || !formData.username) {
+            showTestResult('Please fill in required fields', 'danger');
+            return;
+        }
+        
+        testBtn.disabled = true;
+        testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+        showTestResult('Testing connection...', 'info');
+        
+        fetch('/test_connection', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showTestResult('✓ Connection successful!', 'success');
+            } else {
+                showTestResult('✗ Connection failed: ' + data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            showTestResult('✗ Error: ' + error.message, 'danger');
+        })
+        .finally(() => {
+            testBtn.disabled = false;
+            testBtn.innerHTML = '<i class="fas fa-plug"></i> Test Connection';
+        });
+    });
+    
+    function showTestResult(message, type) {
+        testResult.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+});
+</script>
+{% endblock %}
