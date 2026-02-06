@@ -37,20 +37,22 @@ pip install -r requirements.txt
 - Access application with port: 5000
 - Default credentials: username: </code>admin</code> password: </code>admin</code>
   <code>
-  ✓ Loaded encryption key from encryption_key.key
-🚀 Memulai Web SSH Client...
-✅ Database sudah ada, siap digunakan
+✓ Loaded encryption key from encryption_key.key
+🚀 Starting Web SSH Client...
+✅ The database is ready to use.
+✅ Live session tracking system started
     ╔══════════════════════════════════════════╗
-    ║     Web SSH Client - Local Server        ║
+    ║           🛟 Web SSH Client 🛟          ║
     ╠══════════════════════════════════════════╣
-    ║  • Local: http://127.0.0.1:5000          ║
-    ║  • Network: http://[YOUR-IP]:5000        ║
+    ║  🚧 Local: http://localhost:5000         ║
+    ║  🚧 Network: http://[YOUR-IP]:5000       ║
     ║                                          ║
-    ║  Default Credentials:                    ║
-    ║  • Username: admin                       ║
-    ║  • Password: admin                       ║
+    ║  🔐 Default Credentials 🔐              ║
+    ║  ✅ Username: admin     ☀️              ║
+    ║  ✅ Password: admin     ☀️              ║
     ║                                          ║
-    ║  Press Ctrl+C to stop server             ║
+    ║  Live Session Tracking: ✅ ENABLED       ║
+    ║  Press Ctrl+C ❌ to Stop Server          ║
     ╚══════════════════════════════════════════╝
   </code>
 - To reset configuration and data
