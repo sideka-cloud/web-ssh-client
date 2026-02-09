@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+.env
+
+# Ignore virtual environment dari local
+/venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-*
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Instance 
+instance/*.db
+instance/*.sqlite3
+
+# Backups
+*.bak
+*.backup
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Docker files (opsional)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Local scripts
+clean_start.sh
+clean_start.bat
