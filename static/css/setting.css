@@ -1,0 +1,45 @@
+/* Application : Web SSH Client
+This application build with Python3 for access server via web SSH
+Build by : herdiana3389 (https://sys-ops.id)
+License : MIT (Open Source)
+Repository : https://hub.docker.com/r/sysopsid/web-ssh-client  */
+
+/* Custom styles for password toggle buttons */
+.input-group button {
+    background-color: #f8f9fa !important;
+    border-color: #ced4da !important;
+    transition: all 0.2s ease;
+}
+
+.input-group button:hover {
+    background-color: #e9ecef !important;
+}
+
+.input-group button.active {
+    background-color: #e7f1ff !important;
+    border-color: #86b7fe !important;
+    color: #0a58ca !important;
+}
+
+.input-group .form-control:focus {
+    box-shadow: none;
+    border-color: #86b7fe;
+}
+
+.input-group {
+    border-radius: 0.375rem;
+}
+
+.input-group .form-control {
+    border-right: none;
+}
+
+.input-group button {
+    border-left: none;
+    z-index: 3;
+}
+
+/* Password strength indicator */
+.password-strength {
+    font-size: 0.85rem;
+}

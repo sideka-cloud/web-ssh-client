@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Edit SSH Connection{% endblock %}
+
+{% block styles %}
+<style>
+    .auth-method-content {
+        display: none;
+    }
+    .auth-method-content.active {
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-edit"></i> Edit SSH Connection</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('edit_connection', connection_id=connection.id) }}" id="connectionForm">
+                    <!-- Basic Info -->
+                    <div class="mb-4">
+                        <h5><i class="fas fa-info-circle"></i> Connection Info</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Connection Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" required
+                                       value="{{ connection.name }}">
+                                <div class="form-text">A friendly name for this connection</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="hostname" class="form-label">Hostname / IP Address *</label>
+                                <input type="text" class="form-control" id="hostname" name="hostname" required
+                                       value="{{ connection.hostname }}">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="port" class="form-label">Port</label>
+                                <input type="number" class="form-control" id="port" name="port" 
+                                       value="{{ connection.port }}" min="1" max="65535">
+                            </div>
+                            <div class="col-md-9 mb-3">
+                                <label for="username" class="form-label">Username *</label>
+                                <input type="text" class="form-control" id="username" name="username" required
+                                       value="{{ connection.username }}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Authentication Method -->
+                    <div class="mb-4">
+                        <h5><i class="fas fa-key"></i> Authentication</h5>
+                        
+                        <div class="mb-3">
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="auth_method" id="auth_password" 
+                                       value="password" {% if not connection.private_key %}checked{% endif %}>
+                                <label class="btn btn-outline-primary" for="auth_password">
+                                    <i class="fas fa-lock"></i> Password
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="auth_method" id="auth_key" 
+                                       value="key" {% if connection.private_key %}checked{% endif %}>
+                                <label class="btn btn-outline-primary" for="auth_key">
+                                    <i class="fas fa-key"></i> SSH Key
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Password Method -->
+                        <div id="password_auth" class="auth-method-content {% if not connection.private_key %}active{% endif %}">
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" name="password"
+                                           placeholder="Leave empty to keep current password">
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">Leave empty to keep current password</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Key Method -->
+                        <div id="key_auth" class="auth-method-content {% if connection.private_key %}active{% endif %}">
+                            <div class="mb-3">
+                                <label for="private_key" class="form-label">Private Key</label>
+                                <textarea class="form-control font-monospace" id="private_key" name="private_key" 
+                                          rows="10" placeholder="-----BEGIN RSA PRIVATE KEY-----...">{{ connection.private_key or '' }}</textarea>
+                                <div class="form-text">Paste your SSH private key here</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Test Connection -->
+                    <div class="mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="fas fa-vial"></i> Test Connection</h6>
+                            </div>
+                            <div class="card-body">
+                                <button type="button" class="btn btn-outline-info" id="testConnectionBtn">
+                                    <i class="fas fa-plug"></i> Test Connection
+                                </button>
+                                <div id="testResult" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('connections') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Update Connection
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/edit-conn.js') }}"></script>
+{% endblock %}
