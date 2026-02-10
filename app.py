@@ -1134,17 +1134,16 @@ if __name__ == '__main__':
     try:
         print(f"""
     ╔══════════════════════════════════════════╗
-    ║           🛟 Web SSH Client 🛟           ║
+    ║           • Web SSH Client •             ║
     ╠══════════════════════════════════════════╣
-    ║  🚧 Local: http://localhost:5000         ║
-    ║  🚧 Network: http://[YOUR-IP]:5000       ║
+    ║  Local: http://localhost:5000            ║
+    ║  Network: http://[YOUR-IP]:5000          ║
     ║                                          ║
-    ║  🔐 Default Credentials 🔐               ║
-    ║  ✅ Username: admin     ☀️               ║
-    ║  ✅ Password: admin     ☀️               ║
+    ║  Default Credentials                     ║
+    ║  • Username: admin                       ║
+    ║  • Password: admin                       ║
     ║                                          ║
-    ║  Live Session Tracking: ✅ ENABLED       ║
-    ║  Press Ctrl+C ❌ to Stop Server          ║
+    ║  Press Ctrl+C to Stop Server             ║
     ╚══════════════════════════════════════════╝
         """)
 
@@ -1159,3 +1158,4 @@ if __name__ == '__main__':
         print("\n🛑 Server dihentikan oleh user")
     except Exception as e:
         print(f"\n❌ Error menjalankan server: {e}")
+        
