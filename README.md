@@ -14,7 +14,7 @@ A web-based SSH client that runs locally on your machine.
 
 ## Requirements
 
-- Only Python 3.8 to 3.11
+- Only Python 3.10 to 3.12
 - Modern web browser
 
 ## How To RUN
